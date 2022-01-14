@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+
 	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
@@ -29,13 +30,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "hydro",
 	Short: "A tool for managing Kubernetes Helm Releases",
-	Long: `A tool for managing Kubernetes Helm Releases
-Usage:
-  hydro [command]
-
-Commands:
-  init	
-`,
+	Long:  `A tool for managing Kubernetes Helm Releases`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

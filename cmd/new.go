@@ -17,34 +17,36 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// initCmd represents the init command
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize your hydro repository",
-	Long: `Initialize your hydro repository`,
-	Run: func(cmd *cobra.Command, args []string) {
+var PathSeparatorString = string(os.PathSeparator)
+
+// newCmd represents the new command
+var newCmd = &cobra.Command{
+	Use:   "new [repo]",
+	Short: "Generate a new hydro repository",
+	Long:  `Generate a new hydro repository`,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		switch len(args) {
-		case 0:
-			fmt.Println(cmd.Usage())
-			break
 		case 1:
-			initialize(cmd, args)
-			break
-		default:
-			fmt.Println("Must provide repo name and ONLY repo name")
-			break
+			return initialize(cmd, args)
 		}
+
+		return cmd.Help()
 	},
 }
 
+var initialDirs = [...]string{
+	"charts",
+	"releases",
+}
+
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(newCmd)
+	newCmd.DisableFlagsInUseLine = true
 
 	// Here you will define your flags and configuration settings.
 
@@ -57,17 +59,46 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func initRootDir(path string) error {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(path, os.ModePerm)
+func initDirs(path string) error {
+	err := makeDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, dir := range initialDirs {
+		curPath := path + PathSeparatorString + dir
+		err = makeDir(curPath)
 		if err != nil {
 			return err
 		}
+
+		makeEmptyFile(curPath + PathSeparatorString + ".gitkeep")
 	}
 
 	return nil
 }
 
-func initialize(cmd *cobra.Command, args []string) {
-	initRootDir(args[0])
+func initialize(cmd *cobra.Command, args []string) error {
+	err := initDirs(args[0])
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func makeDir(path string) error {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return os.Mkdir(path, os.ModePerm)
+	}
+
+	return nil
+}
+
+func makeEmptyFile(path string) error {
+	emptyFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	return emptyFile.Close()
 }
