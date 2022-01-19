@@ -22,8 +22,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var PathSeparatorString = string(os.PathSeparator)
-
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new [repo]",
